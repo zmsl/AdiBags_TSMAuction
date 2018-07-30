@@ -1,5 +1,5 @@
 ## Interface: 62000
-## Title: AdiBags - Filter for TSM Auctions
+## Title: AdiBags-TSMAuction - Filter for TSM Auctions
 ## Notes: Adds TSM auction related filters to AdiBags.
 ## Author: anakappa
 ## Version: v1.0
