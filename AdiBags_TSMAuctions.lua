@@ -25,6 +25,41 @@ local adiServer = GetRealmName()
 local adiFaction = UnitFactionGroup("player")
 local adiServerFaction = format("%s-%s", adiServer, adiFaction)
 
+-- Helper methods (Credit to https://authors.curseforge.com/forums/world-of-warcraft/general-chat/lua-code-discussion/225779-check-if-item-is-soulbound)
+local tooltip
+local function create()
+  local tip, leftside = CreateFrame("GameTooltip"), {}
+  for i = 1,6 do
+    local L,R = tip:CreateFontString(), tip:CreateFontString()
+    L:SetFontObject(GameFontNormal)
+    R:SetFontObject(GameFontNormal)
+    tip:AddFontStrings(L,R)
+    leftside[i] = L
+  end
+  tip.leftside = leftside
+  return tip
+end
+local function is_soulbound_item(slotData)   -- returns boolean
+  local rtn = false
+
+  tooltip = tooltip or create()
+  tooltip:SetOwner(UIParent,"ANCHOR_NONE")
+  tooltip:ClearLines()
+  if slotData.bag == BANK_CONTAINER then
+    tooltip:SetInventoryItem("player", BankButtonIDToInvSlotID(slotData.slot, nil))
+  else
+    tooltip:SetBagItem(slotData.bag, slotData.slot)
+  end
+  for i = 1,6 do
+    if tooltip.leftside[i]:GetText() == ITEM_SOULBOUND then
+      rtn = true
+    end
+  end
+  tooltip:Hide()
+
+  return rtn
+end
+
 -- The filter itself
 local setFilter = addon:RegisterFilter("TSMAuction", 0, 'ABEvent-1.0')
 setFilter.uiName = L['AdiBags_TSM.Name']
@@ -50,6 +85,7 @@ end
 
 function setFilter:Filter(slotData)
   if not TSMAPI_FOUR then return nil end
+  if is_soulbound_item(slotData) then return nil end
 
   local ahQuantity = TSMAPI_FOUR.Inventory.GetAuctionQuantity(TSMAPI_FOUR.Item.ToItemString(slotData.itemId), adiPlayerName, adiServerFaction)
 
